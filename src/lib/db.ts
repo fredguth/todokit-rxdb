@@ -6,12 +6,22 @@ const _create = async () => {
 	// Imports are here so they don't run during SSR
 	const { createRxDatabase, addRxPlugin } = await import('rxdb');
 	const { addPouchPlugin, getRxStoragePouch } = await import('rxdb/plugins/pouchdb');
-	const { RxDBQueryBuilderPlugin } = await import('rxdb/plugins/query-builder');
-	const { RxDBUpdatePlugin } = await import('rxdb/plugins/update');
-	const PouchdbAdapterIdb = await import('pouchdb-adapter-idb');
-	await addPouchPlugin(PouchdbAdapterIdb);
-	await addRxPlugin(RxDBQueryBuilderPlugin);
-	await addRxPlugin(RxDBUpdatePlugin);
+
+	await Promise.all([
+		import('rxdb/plugins/query-builder').then((module) =>
+			addRxPlugin(module.RxDBQueryBuilderPlugin)
+		),
+		import('rxdb/plugins/replication-couchdb').then((module) =>
+			addRxPlugin(module.RxDBReplicationCouchDBPlugin)
+		),
+		import('rxdb/plugins/update').then((module) => addRxPlugin(module.RxDBUpdatePlugin)),
+		import('rxdb/plugins/leader-election').then((module) =>
+			addRxPlugin(module.RxDBLeaderElectionPlugin)
+		),
+		import('pouchdb-adapter-idb').then((PouchdbAdapterIdb) => addPouchPlugin(PouchdbAdapterIdb)),
+		import('pouchdb-adapter-http').then((PouchdbAdapterHttp) => addPouchPlugin(PouchdbAdapterHttp))
+	]);
+
 	/**
 	 * to reduce the build-size,
 	 * we use some modules in dev-mode only
@@ -41,15 +51,19 @@ const _create = async () => {
 	});
 
 	// create collections
-	await db.addCollections({ todos: { schema: todoSchema } });
+	const collections = { todos: { schema: todoSchema } };
+	await db.addCollections(collections);
 
 	// Sync
-	// const syncURL = `http://${window.location.hostname}:5984/`;
-	// Object.keys(collections).forEach((name) =>
-	// 	db[name].sync({
-	// 		remote: syncURL + name + '/'
-	// 	})
-	// );
+	const syncURL = `http://${window.location.hostname}:5984/`;
+	// console.log(db.collections['todos']).syncCouchDB();
+
+	Object.keys(collections).forEach((name) => {
+		db[name].syncCouchDB({
+			remote: syncURL + name + '/',
+			waitForLeadership: true
+		});
+	});
 
 	return db;
 };
@@ -57,8 +71,6 @@ const _create = async () => {
 // DB is shared singleton
 let dbPromise;
 export const getDb = () => {
-	// const syncURL = `http://${window.location.hostname}:5984/`;
-	// if (!dbPromise) dbPromise = _create(syncURL);
 	if (!dbPromise) dbPromise = _create();
 	return dbPromise;
 };
