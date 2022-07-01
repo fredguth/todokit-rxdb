@@ -2,6 +2,7 @@
   export let filter = '';
   export let todos = [];
   export let onRemoveTodo;
+  export let onToggleTodo;
 
   $: visibleTodos = todos.filter((todo) => {
     switch (filter) {
@@ -24,13 +25,14 @@
       <input
         class="toggle"
         type="checkbox"
-        bind:checked={todo.done}
+        checked={todo.done}
+        on:change={() => onToggleTodo(todo)}
         data-testid={'todo-checkbox-' + todo.id} />
       <label
         for="{'todo-checkbox-' + todo.id}"
         data-testid={'todo-label-' + todo.id}>{todo.name}</label>
       <button
-        class="destroy" on:click={() => onRemoveTodo(todo.id)}
+        class="destroy" on:click={() => onRemoveTodo(todo)}
         data-testid={'todo-delete-' + todo.id} />
     </li>
   {/each}

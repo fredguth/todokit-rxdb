@@ -1,5 +1,6 @@
 import adapter from '@sveltejs/adapter-auto';
 import preprocess from 'svelte-preprocess';
+import * as p from 'process';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -11,11 +12,9 @@ const config = {
 		adapter: adapter(),
 		vite: {
 			define: {
-				global: 'window'
+				global: 'window',
+				process: { env: {} }
 			}
-			// optimizeDeps: {
-			// 	allowNodeBuiltins: ['rxdb', 'pouchdb-adapter-idb']
-			// }
 		}
 	}
 };

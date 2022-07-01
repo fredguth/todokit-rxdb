@@ -5,15 +5,16 @@
 	import { onMount } from 'svelte';
 	import { getDb } from '$lib/db';
 
-
-
 	let todosFilter = '';
 	let db$;
-	let todos = [];
-	onMount(() => {
-		// window.process = window.process || {env:{}};
-		// window.global = window;
-		db$ = getDb();
+	let todos = []
+	onMount(async () => {
+
+		db$ = await getDb();
+		db$.todos
+			.find()
+			.sort({ createdAt: 'asc' })
+			.$.subscribe((stored) => (todos = stored));
 	});
 	const filters = [
 		{ name: 'All', filterBy: '' },
@@ -24,35 +25,26 @@
 	$: completeTodos = todos.filter((todo) => todo.done === true);
 	$: incompleteTodos = todos.filter((todo) => todo.done === false);
 
-	// const addTodo = (newTodoName) => {
-	//   todos = [
-	//     ...todos,
-	//     {
-	//       // TODO Make ID more unique
-	//       id: 'todo-' + todos.length.toString(),
-	//       name: newTodoName,
-	//       done: false
-	//     }
-	//   ];
-	// };
 	const addTodo = async (newTodoName) => {
-		// let timestamp = new Date().getTime();
-		// await db$.todos.insert({
-		// 	// TODO make ID unique
-		// 	id: 'todo-' + timestamp,
-		// 	name: newTodoName,
-		// 	done: false,
-		// 	createdAt: timestamp,
-		// 	updatedAt: timestamp
-		// });
+		let timestamp = new Date().getTime();
+		await db$.todos.insert({
+			// TODO make ID unique
+			id: 'todo-' + timestamp,
+			name: newTodoName,
+			done: false,
+			createdAt: timestamp,
+			updatedAt: timestamp
+		});
 	};
-	const removeTodo = (id) => {
-		todos = todos.filter((todo) => todo.id !== id);
-	};
+	const toggleTodo = async (todo) => {
+		let data = {...todo.toJSON()};
+		data.done = !data.done;
+		data.updatedAt = new Date().getTime();
+		await todo.atomicPatch(data)
+	}
+	const removeTodo = async (todo) => await todo.remove();
 
-	const clearCompleted = () => {
-		todos = incompleteTodos;
-	};
+	const clearCompleted = () => completeTodos.forEach((completed) => removeTodo(completed));
 </script>
 
 <header class="header">
@@ -67,7 +59,7 @@
 		<!-- <input id="toggle-all" class="toggle-all" type="checkbox" /> -->
 		<!-- <label for="toggle-all">Mark all as complete</label> -->
 
-		<TodoList {todos} filter={todosFilter} onRemoveTodo={removeTodo} />
+		<TodoList {todos} filter={todosFilter} onToggleTodo={toggleTodo} onRemoveTodo={removeTodo} />
 	</section>
 
 	{#if todos.length}

@@ -8,19 +8,27 @@ const todoSchema = {
 	primaryKey: 'id',
 	properties: {
 		id: {
-			type: 'string'
+			type: 'string',
+			maxLength: 100
 		},
 		name: {
-			type: 'string'
+			type: 'string',
+			maxLength: 100
 		},
 		done: {
 			type: 'boolean'
 		},
 		createdAt: {
-			type: 'number'
+			type: 'number',
+			multipleOf: 1,
+			minimum: 0,
+			maximum: 9000000000000
 		},
 		updatedAt: {
-			type: 'number'
+			type: 'number',
+			multipleOf: 1,
+			minimum: 0,
+			maximum: 9000000000000
 		}
 	},
 	required: ['id']
