@@ -1,5 +1,5 @@
 {
-	"name": "~TODO~",
+	"name": "todokit",
 	"version": "0.0.1",
 	"scripts": {
 		"dev": "svelte-kit dev",
@@ -20,8 +20,15 @@
 		"eslint": "^8.16.0",
 		"eslint-config-prettier": "^8.3.0",
 		"eslint-plugin-svelte3": "^4.0.0",
+		"events": "^3.3.0",
+		"pouchdb-adapter-http": "^7.2.2",
+		"pouchdb-adapter-idb": "^7.2.2",
+		"pouchdb-server": "^4.2.0",
 		"prettier": "^2.6.2",
 		"prettier-plugin-svelte": "^2.7.0",
+		"process": "^0.11.10",
+		"rxdb": "^12.6.7",
+		"rxjs": "^7.1.0",
 		"svelte": "^3.44.0",
 		"svelte-check": "^2.7.1",
 		"svelte-preprocess": "^4.10.6",

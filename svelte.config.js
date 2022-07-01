@@ -8,7 +8,15 @@ const config = {
 	preprocess: preprocess(),
 
 	kit: {
-		adapter: adapter()
+		adapter: adapter(),
+		vite: {
+			define: {
+				global: 'window'
+			}
+			// optimizeDeps: {
+			// 	allowNodeBuiltins: ['rxdb', 'pouchdb-adapter-idb']
+			// }
+		}
 	}
 };
 
