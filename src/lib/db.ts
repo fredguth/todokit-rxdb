@@ -1,4 +1,4 @@
-import todoSchema from './todoSchema';
+import todoSchema from './todo.schema.json';
 import { dev } from '$app/env';
 
 // import { type RxDocument, type RxCollection, type RxDatabase } from 'rxdb';
